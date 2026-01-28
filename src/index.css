@@ -2,95 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Starship-inspired dark theme */
+    --background: 230 25% 5%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 230 20% 8%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 230 20% 10%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Cyan/Teal accent - Starship brand inspired */
+    --primary: 185 80% 50%;
+    --primary-foreground: 230 25% 5%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 230 15% 15%;
+    --secondary-foreground: 210 40% 90%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 230 15% 12%;
+    --muted-foreground: 215 15% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 185 70% 45%;
+    --accent-foreground: 230 25% 5%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 230 15% 18%;
+    --input: 230 15% 15%;
+    --ring: 185 80% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Custom design tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(185 80% 50%), hsl(195 85% 45%));
+    --gradient-dark: linear-gradient(180deg, hsl(230 25% 8%), hsl(230 25% 3%));
+    --gradient-card: linear-gradient(145deg, hsl(230 20% 10%), hsl(230 20% 6%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(185 80% 50% / 0.15), transparent 70%);
+    
+    --shadow-glow: 0 0 30px hsl(185 80% 50% / 0.2);
+    --shadow-card: 0 4px 20px hsl(230 25% 2% / 0.5);
+    --shadow-elevated: 0 8px 40px hsl(230 25% 2% / 0.6);
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Persona colors */
+    --persona-student: 185 80% 50%;
+    --persona-merchant: 35 90% 55%;
+    --persona-campus-ops: 280 70% 60%;
+    --persona-partner: 145 70% 50%;
+    --persona-fleet-ops: 350 75% 55%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Phase colors */
+    --phase-0-30: 185 80% 50%;
+    --phase-31-60: 145 70% 50%;
+    --phase-61-90: 35 90% 55%;
+    --phase-3-6: 280 70% 60%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Orbit ring colors */
+    --orbit-demand: 185 80% 50%;
+    --orbit-merchant: 35 90% 55%;
+    --orbit-fulfillment: 145 70% 50%;
+    --orbit-control: 280 70% 60%;
+    --orbit-enablers: 350 75% 55%;
+    --orbit-adjacent: 210 70% 60%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 230 25% 5%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 185 80% 50%;
+    --sidebar-primary-foreground: 230 25% 5%;
+    --sidebar-accent: 230 15% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 230 15% 18%;
+    --sidebar-ring: 185 80% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 230 25% 5%;
     --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
+    --card: 230 20% 8%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
+    --popover: 230 20% 10%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
+    --primary: 185 80% 50%;
+    --primary-foreground: 230 25% 5%;
+    --secondary: 230 15% 15%;
+    --secondary-foreground: 210 40% 90%;
+    --muted: 230 15% 12%;
+    --muted-foreground: 215 15% 55%;
+    --accent: 185 70% 45%;
+    --accent-foreground: 230 25% 5%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 230 15% 18%;
+    --input: 230 15% 15%;
+    --ring: 185 80% 50%;
   }
 }
 
@@ -99,7 +107,230 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  html {
+    scroll-behavior: smooth;
   }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(180deg, hsl(230 25% 5%), hsl(230 25% 3%));
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(185 80% 50%), hsl(195 85% 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .card-glass {
+    background: linear-gradient(145deg, hsl(230 20% 10% / 0.9), hsl(230 20% 6% / 0.9));
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(230 15% 20% / 0.5);
+  }
+
+  .card-glow {
+    box-shadow: 0 0 30px hsl(185 80% 50% / 0.1);
+  }
+
+  .glow-line {
+    background: linear-gradient(90deg, transparent, hsl(185 80% 50%), transparent);
+    height: 1px;
+  }
+
+  .orbit-ring {
+    border: 1px dashed hsl(230 15% 25%);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .persona-tag {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .persona-student {
+    background: hsl(185 80% 50% / 0.15);
+    color: hsl(185 80% 60%);
+    border: 1px solid hsl(185 80% 50% / 0.3);
+  }
+
+  .persona-merchant {
+    background: hsl(35 90% 55% / 0.15);
+    color: hsl(35 90% 65%);
+    border: 1px solid hsl(35 90% 55% / 0.3);
+  }
+
+  .persona-campus-ops {
+    background: hsl(280 70% 60% / 0.15);
+    color: hsl(280 70% 70%);
+    border: 1px solid hsl(280 70% 60% / 0.3);
+  }
+
+  .persona-partner {
+    background: hsl(145 70% 50% / 0.15);
+    color: hsl(145 70% 60%);
+    border: 1px solid hsl(145 70% 50% / 0.3);
+  }
+
+  .persona-fleet-ops {
+    background: hsl(350 75% 55% / 0.15);
+    color: hsl(350 75% 65%);
+    border: 1px solid hsl(350 75% 55% / 0.3);
+  }
+
+  .touchpoint-tag {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+    background: hsl(230 15% 18%);
+    color: hsl(210 40% 80%);
+    border: 1px solid hsl(230 15% 25%);
+  }
+
+  .phase-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold;
+  }
+
+  .phase-0-30 {
+    background: hsl(185 80% 50% / 0.15);
+    color: hsl(185 80% 60%);
+    border: 1px solid hsl(185 80% 50% / 0.4);
+  }
+
+  .phase-31-60 {
+    background: hsl(145 70% 50% / 0.15);
+    color: hsl(145 70% 60%);
+    border: 1px solid hsl(145 70% 50% / 0.4);
+  }
+
+  .phase-61-90 {
+    background: hsl(35 90% 55% / 0.15);
+    color: hsl(35 90% 65%);
+    border: 1px solid hsl(35 90% 55% / 0.4);
+  }
+
+  .phase-3-6 {
+    background: hsl(280 70% 60% / 0.15);
+    color: hsl(280 70% 70%);
+    border: 1px solid hsl(280 70% 60% / 0.4);
+  }
+
+  .scroll-indicator {
+    @apply fixed top-0 left-0 h-1 z-50;
+    background: linear-gradient(90deg, hsl(185 80% 50%), hsl(195 85% 60%));
+  }
+
+  .nav-link {
+    @apply text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium;
+  }
+
+  .nav-link-active {
+    @apply text-primary;
+  }
+
+  .section-header {
+    @apply font-display text-3xl md:text-4xl font-bold mb-2;
+  }
+
+  .section-subheader {
+    @apply text-muted-foreground text-lg mb-8;
+  }
+
+  .kpi-tile {
+    @apply card-glass rounded-xl p-4 cursor-pointer transition-all duration-300;
+  }
+
+  .kpi-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px hsl(185 80% 50% / 0.15);
+  }
+
+  .experiment-card {
+    @apply card-glass rounded-xl p-5 transition-all duration-300;
+  }
+
+  .experiment-card:hover {
+    border-color: hsl(185 80% 50% / 0.4);
+  }
+
+  .timeline-connector {
+    @apply absolute top-1/2 left-0 right-0 h-0.5;
+    background: linear-gradient(90deg, hsl(185 80% 50% / 0.3), hsl(280 70% 60% / 0.3));
+  }
+
+  .focus-ring:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .card-glass {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
+
+  .text-gradient {
+    -webkit-text-fill-color: black !important;
+    background: none !important;
+  }
+
+  .section-header {
+    color: black !important;
+  }
+
+  .persona-tag,
+  .touchpoint-tag,
+  .phase-badge {
+    border: 1px solid #999 !important;
+    background: #f5f5f5 !important;
+    color: #333 !important;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px hsl(185 80% 50% / 0.2); }
+  50% { box-shadow: 0 0 40px hsl(185 80% 50% / 0.4); }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
 }
