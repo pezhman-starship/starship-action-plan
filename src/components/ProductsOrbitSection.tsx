@@ -76,7 +76,7 @@ export const ProductsOrbitSection = () => {
           </div>
 
           {/* Orbit Visualization */}
-          <div className="relative min-h-[700px] md:min-h-[900px] lg:min-h-[1000px]">
+          <div className="relative w-full" style={{ height: '800px' }}>
             {/* Center Node */}
             <motion.div
               initial={{ scale: 0 }}
@@ -84,42 +84,57 @@ export const ProductsOrbitSection = () => {
               viewport={{ once: true }}
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
             >
-              <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg animate-pulse-glow">
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg animate-pulse-glow">
                 <div className="text-center">
-                  <LucideIcons.Orbit className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground mx-auto mb-1" />
-                  <span className="text-[10px] md:text-xs font-bold text-primary-foreground">Starship 360</span>
+                  <LucideIcons.Orbit className="h-6 w-6 md:h-7 md:w-7 text-primary-foreground mx-auto mb-1" />
+                  <span className="text-[9px] md:text-[10px] font-bold text-primary-foreground">Starship 360</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Orbit Rings - increased radii with better spacing */}
-            {[100, 170, 250, 330, 410].map((radius, i) => (
+            {/* Orbit Rings */}
+            {[120, 200, 280, 360].map((radius, i) => (
               <div
                 key={i}
-                className="orbit-ring pointer-events-none"
-                style={{ width: radius * 2, height: radius * 2 }}
+                className="absolute left-1/2 top-1/2 rounded-full border border-dashed border-muted/30 pointer-events-none"
+                style={{ 
+                  width: radius * 2, 
+                  height: radius * 2,
+                  transform: 'translate(-50%, -50%)'
+                }}
               />
             ))}
 
-            {/* Products by Ring - with better spacing */}
+            {/* Products by Ring */}
             {productsByRing.map((ring) => {
-              // Increased radii with more spacing between rings
-              const baseRadius = ring.id === 'demand' ? 100 : 
-                               ring.id === 'merchant' ? 170 :
-                               ring.id === 'fulfillment' ? 250 :
-                               ring.id === 'control' ? 330 :
-                               ring.id === 'enablers' ? 410 : 480;
+              const ringRadii: Record<string, number> = {
+                demand: 120,
+                merchant: 180,
+                fulfillment: 240,
+                control: 300,
+                enablers: 360,
+                adjacent: 420,
+              };
               
-              // Calculate offset angle per ring to avoid vertical alignment
-              const ringOffset = ring.id === 'demand' ? 0 : 
-                                ring.id === 'merchant' ? Math.PI / 6 :
-                                ring.id === 'fulfillment' ? Math.PI / 4 :
-                                ring.id === 'control' ? Math.PI / 3 :
-                                ring.id === 'enablers' ? Math.PI / 5 : Math.PI / 7;
+              const baseRadius = ringRadii[ring.id] || 200;
+              
+              const ringOffsets: Record<string, number> = {
+                demand: 0,
+                merchant: 0.5,
+                fulfillment: 0.25,
+                control: 0.75,
+                enablers: 0.1,
+                adjacent: 0.6,
+              };
+              
+              const offsetFraction = ringOffsets[ring.id] || 0;
               
               return ring.products.map((product, index) => {
-                // Better distribution with offset per ring
-                const angle = (index / Math.max(ring.products.length, 1)) * 2 * Math.PI - Math.PI / 2 + ringOffset;
+                const totalProducts = ring.products.length;
+                const angleStep = (2 * Math.PI) / Math.max(totalProducts, 1);
+                const startAngle = -Math.PI / 2 + (offsetFraction * Math.PI);
+                const angle = startAngle + (index * angleStep);
+                
                 const x = Math.cos(angle) * baseRadius;
                 const y = Math.sin(angle) * baseRadius;
                 const Icon = getIcon(product.icon);
@@ -131,27 +146,30 @@ export const ProductsOrbitSection = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.05 }}
-                    whileHover={{ scale: 1.15, zIndex: 20 }}
+                    whileHover={{ scale: 1.2, zIndex: 30 }}
                     onClick={() => setSelectedProduct(product)}
-                    className="absolute left-1/2 top-1/2 focus-ring rounded-full z-[5]"
+                    className="absolute focus-ring rounded-full"
                     style={{ 
-                      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                      left: `calc(50% + ${x}px)`,
+                      top: `calc(50% + ${y}px)`,
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 5,
                     }}
                     aria-label={`View details for ${product.name}`}
                   >
                     <div 
-                      className="w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center cursor-pointer transition-all hover:shadow-lg"
+                      className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center cursor-pointer transition-all hover:shadow-lg"
                       style={{ 
                         background: orbitBgColors[ring.id],
                         border: `2px solid ${orbitColors[ring.id]}`,
                       }}
                     >
-                      <Icon className="h-4 w-4 md:h-5 md:w-5" style={{ color: orbitColors[ring.id] }} />
+                      <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: orbitColors[ring.id] }} />
                     </div>
                     <span 
-                      className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] md:text-xs whitespace-nowrap text-muted-foreground max-w-[80px] md:max-w-[100px] truncate text-center"
+                      className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] whitespace-nowrap text-muted-foreground max-w-[70px] md:max-w-[90px] truncate text-center font-medium"
                     >
-                      {product.name.replace('Starship ', '')}
+                      {product.name.replace('Starship ', '').replace('Campus ', '')}
                     </span>
                   </motion.button>
                 );
