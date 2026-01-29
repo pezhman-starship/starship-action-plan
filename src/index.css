@@ -131,6 +131,24 @@
     background-clip: text;
   }
 
+  .starship-gradient-text {
+    background-image: linear-gradient(90deg,
+      #FF7A59 0%,
+      #D56AAE 35%,
+      #8A6BFF 70%,
+      #5B7CFF 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: #5B7CFF;
+  }
+
+  @supports (-webkit-background-clip: text) or (background-clip: text) {
+    .starship-gradient-text {
+      color: transparent;
+    }
+  }
+
   .card-glass {
     background: linear-gradient(145deg, hsl(230 20% 10% / 0.9), hsl(230 20% 6% / 0.9));
     backdrop-filter: blur(12px);

@@ -1034,14 +1034,7 @@ export const assumptions: Assumption[] = [
 export const introContent = {
   title: 'Pezhman action plan',
   subtitle: 'Senior Product Manager — Starship 360 full-service suite',
-  introParagraph: `I'm genuinely excited about the messy, end-to-end reality of Starship 360 on university campuses. This isn't a clean SaaS product—it's robots navigating sidewalks, merchants juggling tablet apps alongside their POS, students waiting for their lunch in the rain, and campus ops teams trying to make it all work. That complexity is exactly what draws me in. I've spent my career at the intersection of physical and digital products, and I know that the real leverage comes from understanding the full system—not just optimizing one screen.`,
-  resumePoints: [
-    'Built and scaled marketplace products at the intersection of physical operations and digital experience',
-    'Led reliability initiatives that reduced order failures by 40% through systematic failure mode analysis',
-    'Shipped merchant-facing tools that improved operational efficiency while maintaining simplicity',
-    'Deep experience with multi-stakeholder products where success requires alignment across ops, eng, and business',
-    'Passionate about inclusive design—accessibility isn\'t a feature, it\'s a foundation',
-  ],
+  introParagraph: `I’m really excited about the end-to-end reality of Starship 360 on university campuses. In my view, this is a full suite of products and services that working together: robots operating in real campus conditions, merchants running a dedicated order flow alongside their POS, students relying on accurate ETAs and predictable handoffs, and campus teams coordinating the operational layer that makes it all run. That system-level complexity is exactly what draws me in. In my previous roles, I’ve built and scaled products where physical constraints mixed with digital experiences, and I’ve learned the real leverage comes from understanding & improving the whole system, not just polishing one screen.`,
   linkedIn: 'pezhman-sh',
   howToRead: 'Scroll through sections or use the navigation bar. Filter by persona or touchpoint to focus on areas relevant to you. Click cards to expand details. Use the print button to export a PDF.',
   summaryPitch: `My first 3–6 months would focus on reliability across the full Starship 360 suite: customer app, kitchen tools, kiosks, pickup, delivery, and the partner control plane. I'll start by mapping the full lifecycle and building a failure-mode dashboard, then reduce preventable cancellations and missed handoffs through capacity controls, demand steering, and better readiness and ETA modeling. I'll harden merchant ops tooling and support loops, especially across integrated channels, and scale with a campus playbook that includes accessibility and operational constraints.`,
@@ -1349,3 +1342,4 @@ export const orbitRings = [
   { id: 'enablers', name: 'Enablers', color: 'orbit-enablers' },
   { id: 'adjacent', name: 'Adjacent', color: 'orbit-adjacent' },
 ];
+

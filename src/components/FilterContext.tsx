@@ -71,7 +71,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const GlobalFilterBar = () => {
+export const GlobalFilterBar = ({ isVisible = true }: { isVisible?: boolean }) => {
   const { 
     selectedPersonas, 
     selectedTouchpoints, 
@@ -82,7 +82,12 @@ export const GlobalFilterBar = () => {
   } = useFilters();
 
   return (
-    <div className="fixed top-16 left-0 right-0 z-30 bg-background/90 backdrop-blur-lg border-b border-border no-print">
+    <div
+      className={`fixed top-16 left-0 right-0 z-30 bg-background/90 backdrop-blur-lg border-b border-border no-print transition-all duration-300 motion-reduce:transition-none ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
+      }`}
+      aria-hidden={!isVisible}
+    >
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-col gap-3">
           {/* Personas */}

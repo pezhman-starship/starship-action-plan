@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
-import { Linkedin, Copy, User } from 'lucide-react';
+import { Linkedin, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { introContent } from '@/data/planContent';
 import { toast } from '@/hooks/use-toast';
+import pejPhoto from '@/pic/pej.jpg';
 
 export const HeroSection = () => {
   const handleCopyPitch = async () => {
@@ -23,7 +24,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section id="intro" className="min-h-screen pt-44 pb-20">
+    <section id="intro" className="min-h-screen pt-20 pb-20">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Main Title */}
@@ -33,8 +34,8 @@ export const HeroSection = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h1 className="font-display text-5xl md:text-7xl font-bold mb-4">
-              <span className="text-gradient">{introContent.title}</span>
+            <h1 className="font-display text-5xl md:text-7xl font-bold mb-4 starship-gradient-text">
+              {introContent.title}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground">
               {introContent.subtitle}
@@ -46,14 +47,28 @@ export const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="flex flex-col md:flex-row gap-8 items-start mb-12"
+            className="flex flex-col md:flex-row gap-8 items-start md:items-end mb-12"
           >
-            {/* Photo Placeholder */}
-            <div className="flex-shrink-0 mx-auto md:mx-0">
+            {/* Photo + LinkedIn */}
+            <div className="flex-shrink-0 mx-auto md:mx-0 w-32">
               <div className="w-32 h-32 rounded-2xl bg-muted border border-border flex items-center justify-center overflow-hidden">
-                <User className="w-16 h-16 text-muted-foreground" />
+                <img
+                  src={pejPhoto}
+                  alt="Pezhman portrait"
+                  className="w-full h-full object-cover object-center"
+                />
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-2">Photo placeholder</p>
+              <p className="text-xs text-muted-foreground text-center mt-2">Pezhman Shafiei</p>
+              <Button variant="outline" className="gap-2 focus-ring w-full mt-3" asChild>
+                <a 
+                  href={`https://linkedin.com/in/${introContent.linkedIn}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Linkedin className="h-4 w-4" />
+                  LinkedIn
+                </a>
+              </Button>
             </div>
 
             {/* Intro Paragraph */}
@@ -62,49 +77,6 @@ export const HeroSection = () => {
                 {introContent.introParagraph}
               </p>
             </div>
-          </motion.div>
-
-          {/* Resume Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="mb-8"
-          >
-            <h2 className="font-display text-xl font-semibold mb-4">Quick Background</h2>
-            <ul className="space-y-2">
-              {introContent.resumePoints.map((point, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  className="flex items-start gap-3 text-muted-foreground"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                  <span>{point}</span>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* LinkedIn */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="mb-8"
-          >
-            <Button variant="outline" className="gap-2 focus-ring" asChild>
-              <a 
-                href={`https://linkedin.com/in/${introContent.linkedIn}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Linkedin className="h-4 w-4" />
-                LinkedIn: Pezhman Shafeiee ({introContent.linkedIn})
-              </a>
-            </Button>
           </motion.div>
 
           {/* How to Read */}
@@ -128,7 +100,7 @@ export const HeroSection = () => {
           >
             <Card className="card-glass card-glow p-6 border-primary/20">
               <div className="flex items-start justify-between gap-4 mb-4">
-                <h3 className="font-display text-lg font-semibold">Summary pitch (copy/paste)</h3>
+                <h3 className="font-display text-lg font-semibold">Plan Summary (My Approach)</h3>
                 <Button
                   variant="outline"
                   size="sm"

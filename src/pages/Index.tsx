@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { FilterProvider, GlobalFilterBar } from '@/components/FilterContext';
 import { HeroSection } from '@/components/HeroSection';
@@ -12,20 +13,63 @@ import { AssumptionsSection } from '@/components/AssumptionsSection';
 import { FullPlanSection } from '@/components/FullPlanSection';
 
 const Index = () => {
+  const productsRangeRef = useRef<HTMLDivElement | null>(null);
+  const bottlenecksRangeRef = useRef<HTMLDivElement | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    let rafId = 0;
+    const headerOffset = 96;
+
+    const updateVisibility = () => {
+      rafId = 0;
+      const productsEl = productsRangeRef.current;
+      const bottlenecksEl = bottlenecksRangeRef.current;
+      if (!productsEl || !bottlenecksEl) return;
+
+      const startY = productsEl.getBoundingClientRect().top + window.scrollY - headerOffset;
+      const endY = bottlenecksEl.getBoundingClientRect().bottom + window.scrollY - headerOffset;
+      const y = window.scrollY;
+
+      setShowFilters(y >= startY && y < endY);
+    };
+
+    const requestUpdate = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(updateVisibility);
+    };
+
+    updateVisibility();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+
+    return () => {
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
+  }, []);
+
   return (
     <FilterProvider>
       <div className="min-h-screen bg-background relative">
         <Navigation />
-        <GlobalFilterBar />
+        <GlobalFilterBar isVisible={showFilters} />
         
         <main className="pt-16">
           <HeroSection />
           <div className="glow-line w-full max-w-2xl mx-auto" />
           <OverviewSection />
           <div className="glow-line w-full max-w-2xl mx-auto" />
-          <ProductsOrbitSection />
+          <div ref={productsRangeRef}>
+            <ProductsOrbitSection />
+          </div>
           <div className="glow-line w-full max-w-2xl mx-auto" />
-          <BottlenecksSection />
+          <div ref={bottlenecksRangeRef}>
+            <BottlenecksSection />
+          </div>
           <div className="glow-line w-full max-w-2xl mx-auto" />
           <RoadmapSection />
           <div className="glow-line w-full max-w-2xl mx-auto" />
