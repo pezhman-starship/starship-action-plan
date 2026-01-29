@@ -33,6 +33,8 @@ const orbitBgColors: Record<string, string> = {
   adjacent: 'hsl(210 70% 60% / 0.15)',
 };
 
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
 export const ProductsOrbitSection = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { matchesFilter } = useFilters();
@@ -102,7 +104,7 @@ export const ProductsOrbitSection = () => {
 
       const effectiveDiameter = nodeSizeLocal * hoverFactor;
       const gap = isMd ? 18 : 16;
-      const minSep = effectiveDiameter + gap; // circle-to-circle separation
+      const minSep = effectiveDiameter + 26; // circle-to-circle separation
 
       const maxR = base - nodeRadius - safePadding - labelPad;
       const minR = centerRadius + (isMd ? 96 : 84);
@@ -176,9 +178,33 @@ export const ProductsOrbitSection = () => {
         }
       }
 
+      // Recenter to avoid visual drift (jitter + finite points can shift the "mass")
+      const cx = points.reduce((s, p) => s + p.x, 0) / n;
+      const cy = points.reduce((s, p) => s + p.y, 0) / n;
+
+      for (let i = 0; i < points.length; i++) {
+        let nx = points[i].x - cx;
+        let ny = points[i].y - cy;
+
+        // Clamp back into annulus after recenter
+        const r = Math.hypot(nx, ny);
+        const cr = clamp(r, minR, maxR);
+        const s = cr / (r || 1);
+        nx *= s;
+        ny *= s;
+
+        points[i].x = nx;
+        points[i].y = ny;
+      }
+
       return {
         ok: true as const,
-        positioned: points.map(({ product, x, y }) => ({ product, x, y })),
+        positioned: points.map((p) => ({
+          product: p.product,
+          x: p.x,
+          y: p.y,
+          angle: Math.atan2(p.y, p.x),
+        })),
         rings: [minR, (minR + maxR) / 2, maxR],
       };
     };
@@ -226,26 +252,28 @@ export const ProductsOrbitSection = () => {
           </div>
 
           {/* Orbit Visualization */}
-          <div className="relative w-full">
+          <div className="relative w-full flex justify-center">
             <div
               ref={orbitRef}
               className="relative mx-auto aspect-square w-full max-w-[760px]"
               style={{ maxHeight: '72vh' }}
             >
             {/* Center Node */}
-            <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              viewport={{ once: true }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-            >
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg animate-pulse-glow">
-                <div className="text-center">
-                  <LucideIcons.Orbit className="h-6 w-6 md:h-7 md:w-7 text-primary-foreground mx-auto mb-1" />
-                  <span className="text-[9px] md:text-[10px] font-bold text-primary-foreground">Starship 360</span>
+            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                className="pointer-events-auto"
+              >
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg animate-pulse-glow">
+                  <div className="text-center">
+                    <LucideIcons.Orbit className="h-6 w-6 md:h-7 md:w-7 text-primary-foreground mx-auto mb-1" />
+                    <span className="text-[9px] md:text-[10px] font-bold text-primary-foreground">Starship 360</span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
 
             {/* Orbit Rings */}
             {layout.rings.map((radius, index) => (
@@ -261,8 +289,22 @@ export const ProductsOrbitSection = () => {
             ))}
 
             {/* Products by Ring */}
-            {layout.positioned.map(({ product, x, y }) => {
+            {layout.positioned.map((pos, idx) => {
+              const { product, x, y, angle } = pos;
               const Icon = getIcon(product.icon);
+
+              const a = angle;
+              const labelR = layout.nodeSize / 2 + 22;
+              const radialX = Math.cos(a) * labelR;
+              const radialY = Math.sin(a) * labelR;
+
+              // Tangential stagger to avoid label pile-ups
+              const t = idx % 2 === 0 ? 14 : -14;
+              const tanX = -Math.sin(a) * t;
+              const tanY =  Math.cos(a) * t;
+
+              const labelDx = radialX + tanX;
+              const labelDy = radialY + tanY;
 
               return (
                 <motion.button
@@ -293,8 +335,11 @@ export const ProductsOrbitSection = () => {
                   >
                     <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: orbitColors[product.orbitRing] }} />
                   </div>
-                  <span 
-                    className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] whitespace-nowrap text-muted-foreground max-w-[100px] md:max-w-[120px] truncate text-center font-medium"
+                  <span
+                    className="absolute left-1/2 top-1/2 text-xs text-muted-foreground whitespace-nowrap pointer-events-none truncate w-28 text-center"
+                    style={{
+                      transform: `translate(-50%, -50%) translate(${labelDx}px, ${labelDy}px)`,
+                    }}
                   >
                     {product.name.replace('Starship ', '').replace('Campus ', '')}
                   </span>
