@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
@@ -36,18 +36,168 @@ const orbitBgColors: Record<string, string> = {
 export const ProductsOrbitSection = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { matchesFilter } = useFilters();
+  const orbitRef = useRef<HTMLDivElement | null>(null);
+  const [orbitSize, setOrbitSize] = useState({ width: 0, height: 0 });
 
   const filteredProducts = products.filter(p => 
     matchesFilter(p.personas, p.touchpoints)
   );
 
-  const productsByRing = orbitRings.map(ring => ({
-    ...ring,
-    products: filteredProducts.filter(p => p.orbitRing === ring.id)
-  }));
+  useEffect(() => {
+    const el = orbitRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const rect = el.getBoundingClientRect();
+      setOrbitSize({ width: rect.width, height: rect.height });
+    };
+
+    updateSize();
+
+    // Keep ring radii responsive to container size changes.
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const orderedProducts = filteredProducts
+    .slice()
+    .sort((a, b) => a.id.localeCompare(b.id) || a.name.localeCompare(b.name));
+
+  const nonCenterProducts = orderedProducts.filter(p => p.id !== 'starship-360');
+
+  const layout = useMemo(() => {
+    const width = orbitSize.width || 760;
+    const height = orbitSize.height || 640;
+
+    const size = Math.min(width, height);
+    const base = size / 2;
+
+    const isMd = width >= 768;
+    const centerSize = isMd ? 96 : 80;
+    const centerRadius = centerSize / 2;
+
+    let nodeSize = isMd ? 56 : 48;
+    const minNodeSize = 40;
+
+    const safePadding = isMd ? 24 : 20;
+    const labelPad = isMd ? 26 : 22; // extra space so text doesn't collide
+    const hoverFactor = 1.2;
+
+    // Deterministic hash in [0,1)
+    const hash01 = (s: string) => {
+      let h = 2166136261;
+      for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return (h >>> 0) / 4294967296;
+    };
+
+    const solve = (nodeSizeLocal: number) => {
+      const nodeRadius = nodeSizeLocal / 2;
+
+      const effectiveDiameter = nodeSizeLocal * hoverFactor;
+      const gap = isMd ? 18 : 16;
+      const minSep = effectiveDiameter + gap; // circle-to-circle separation
+
+      const maxR = base - nodeRadius - safePadding - labelPad;
+      const minR = centerRadius + (isMd ? 96 : 84);
+
+      if (maxR <= minR + 8) {
+        return { ok: false as const, positioned: [], rings: [] as number[] };
+      }
+
+      const n = nonCenterProducts.length;
+      if (n === 0) {
+        return { ok: true as const, positioned: [], rings: [minR, (minR + maxR) / 2, maxR] };
+      }
+
+      // Golden angle distribution in annulus
+      const golden = Math.PI * (3 - Math.sqrt(5));
+      const points = nonCenterProducts.map((p, i) => {
+        const t = (i + 0.5) / n; // 0..1
+        const baseR = minR + (maxR - minR) * Math.sqrt(t);
+
+        const j = hash01(p.id);
+        const jitterA = (j - 0.5) * 0.45; // radians, small
+        const jitterR = (hash01(p.id + ':r') - 0.5) * (isMd ? 18 : 14);
+
+        const angle = i * golden - Math.PI / 2 + jitterA;
+        const r = Math.min(maxR, Math.max(minR, baseR + jitterR));
+
+        return {
+          product: p,
+          x: Math.cos(angle) * r,
+          y: Math.sin(angle) * r,
+        };
+      });
+
+      // Relaxation: push apart if too close
+      const iters = 14;
+      for (let k = 0; k < iters; k++) {
+        for (let a = 0; a < points.length; a++) {
+          for (let b = a + 1; b < points.length; b++) {
+            const dx = points[b].x - points[a].x;
+            const dy = points[b].y - points[a].y;
+            const d = Math.hypot(dx, dy) || 0.0001;
+
+            const target = minSep;
+            if (d < target) {
+              const push = (target - d) * 0.5;
+              const ux = dx / d;
+              const uy = dy / d;
+
+              points[a].x -= ux * push;
+              points[a].y -= uy * push;
+              points[b].x += ux * push;
+              points[b].y += uy * push;
+            }
+          }
+
+          // Clamp back into annulus
+          const rr = Math.hypot(points[a].x, points[a].y) || 0.0001;
+          const clamped = Math.min(maxR, Math.max(minR, rr));
+          points[a].x = (points[a].x / rr) * clamped;
+          points[a].y = (points[a].y / rr) * clamped;
+        }
+      }
+
+      // Final validation: if still overlapping badly, fail so caller can shrink node size
+      for (let a = 0; a < points.length; a++) {
+        for (let b = a + 1; b < points.length; b++) {
+          const d = Math.hypot(points[b].x - points[a].x, points[b].y - points[a].y);
+          if (d < minSep * 0.92) {
+            return { ok: false as const, positioned: [], rings: [minR, (minR + maxR) / 2, maxR] };
+          }
+        }
+      }
+
+      return {
+        ok: true as const,
+        positioned: points.map(({ product, x, y }) => ({ product, x, y })),
+        rings: [minR, (minR + maxR) / 2, maxR],
+      };
+    };
+
+    let res = solve(nodeSize);
+    while (!res.ok && nodeSize > minNodeSize) {
+      nodeSize -= 4;
+      res = solve(nodeSize);
+    }
+
+    return {
+      positioned: res.positioned,
+      rings: res.rings,
+      nodeSize,
+    };
+  }, [orbitSize, nonCenterProducts]);
 
   return (
-    <section id="products" className="py-20">
+    <section id="products" className="py-14">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -63,7 +213,7 @@ export const ProductsOrbitSection = () => {
           </p>
 
           {/* Orbit Legend */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex flex-wrap justify-center gap-4 mb-6">
             {orbitRings.map((ring) => (
               <div key={ring.id} className="flex items-center gap-2 text-sm">
                 <div 
@@ -76,7 +226,12 @@ export const ProductsOrbitSection = () => {
           </div>
 
           {/* Orbit Visualization */}
-          <div className="relative w-full" style={{ height: '800px' }}>
+          <div className="relative w-full">
+            <div
+              ref={orbitRef}
+              className="relative mx-auto aspect-square w-full max-w-[760px]"
+              style={{ maxHeight: '72vh' }}
+            >
             {/* Center Node */}
             <motion.div
               initial={{ scale: 0 }}
@@ -93,9 +248,9 @@ export const ProductsOrbitSection = () => {
             </motion.div>
 
             {/* Orbit Rings */}
-            {[120, 200, 280, 360].map((radius, i) => (
+            {layout.rings.map((radius, index) => (
               <div
-                key={i}
+                key={index}
                 className="absolute left-1/2 top-1/2 rounded-full border border-dashed border-muted/30 pointer-events-none"
                 style={{ 
                   width: radius * 2, 
@@ -106,75 +261,47 @@ export const ProductsOrbitSection = () => {
             ))}
 
             {/* Products by Ring */}
-            {productsByRing.map((ring) => {
-              const ringRadii: Record<string, number> = {
-                demand: 120,
-                merchant: 180,
-                fulfillment: 240,
-                control: 300,
-                enablers: 360,
-                adjacent: 420,
-              };
-              
-              const baseRadius = ringRadii[ring.id] || 200;
-              
-              const ringOffsets: Record<string, number> = {
-                demand: 0,
-                merchant: 0.5,
-                fulfillment: 0.25,
-                control: 0.75,
-                enablers: 0.1,
-                adjacent: 0.6,
-              };
-              
-              const offsetFraction = ringOffsets[ring.id] || 0;
-              
-              return ring.products.map((product, index) => {
-                const totalProducts = ring.products.length;
-                const angleStep = (2 * Math.PI) / Math.max(totalProducts, 1);
-                const startAngle = -Math.PI / 2 + (offsetFraction * Math.PI);
-                const angle = startAngle + (index * angleStep);
-                
-                const x = Math.cos(angle) * baseRadius;
-                const y = Math.sin(angle) * baseRadius;
-                const Icon = getIcon(product.icon);
+            {layout.positioned.map(({ product, x, y }) => {
+              const Icon = getIcon(product.icon);
 
-                return (
-                  <motion.button
-                    key={product.id}
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.05 }}
-                    whileHover={{ scale: 1.2, zIndex: 30 }}
-                    onClick={() => setSelectedProduct(product)}
-                    className="absolute focus-ring rounded-full"
+              return (
+                <motion.button
+                  key={product.id}
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.05 }}
+                  whileHover={{ scale: 1.2, zIndex: 30 }}
+                  onClick={() => setSelectedProduct(product)}
+                  className="absolute focus-ring rounded-full"
+                  style={{ 
+                    left: `calc(50% + ${x}px)`,
+                    top: `calc(50% + ${y}px)`,
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 5,
+                  }}
+                  aria-label={`View details for ${product.name}`}
+                >
+                  <div 
+                    className="rounded-full flex items-center justify-center cursor-pointer transition-all hover:shadow-lg"
                     style={{ 
-                      left: `calc(50% + ${x}px)`,
-                      top: `calc(50% + ${y}px)`,
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: 5,
+                      width: layout.nodeSize,
+                      height: layout.nodeSize,
+                      background: orbitBgColors[product.orbitRing],
+                      border: `2px solid ${orbitColors[product.orbitRing]}`,
                     }}
-                    aria-label={`View details for ${product.name}`}
                   >
-                    <div 
-                      className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center cursor-pointer transition-all hover:shadow-lg"
-                      style={{ 
-                        background: orbitBgColors[ring.id],
-                        border: `2px solid ${orbitColors[ring.id]}`,
-                      }}
-                    >
-                      <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: orbitColors[ring.id] }} />
-                    </div>
-                    <span 
-                      className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] whitespace-nowrap text-muted-foreground max-w-[70px] md:max-w-[90px] truncate text-center font-medium"
-                    >
-                      {product.name.replace('Starship ', '').replace('Campus ', '')}
-                    </span>
-                  </motion.button>
-                );
-              });
+                    <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: orbitColors[product.orbitRing] }} />
+                  </div>
+                  <span 
+                    className="absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] whitespace-nowrap text-muted-foreground max-w-[100px] md:max-w-[120px] truncate text-center font-medium"
+                  >
+                    {product.name.replace('Starship ', '').replace('Campus ', '')}
+                  </span>
+                </motion.button>
+              );
             })}
+          </div>
           </div>
 
           {/* Product List (Fallback / Alternative View) */}
