@@ -72,152 +72,67 @@ export const ProductsOrbitSection = () => {
   const nonCenterProducts = orderedProducts.filter(p => p.id !== 'starship-360');
 
   const layout = useMemo(() => {
-    const width = orbitSize.width || 760;
-    const height = orbitSize.height || 640;
-
+    const width = orbitSize.width || 400;
+    const height = orbitSize.height || 400;
     const size = Math.min(width, height);
-    const base = size / 2;
-
+    
+    // Scale everything relative to container size
+    const scale = size / 400; // Base design is 400px
+    
     const isMd = width >= 768;
-    const centerSize = isMd ? 96 : 80;
-    const centerRadius = centerSize / 2;
-
-    let nodeSize = isMd ? 56 : 48;
-    const minNodeSize = 40;
-
-    const safePadding = isMd ? 24 : 20;
-    const labelPad = isMd ? 26 : 22; // extra space so text doesn't collide
-    const hoverFactor = 1.2;
-
-    // Deterministic hash in [0,1)
-    const hash01 = (s: string) => {
-      let h = 2166136261;
-      for (let i = 0; i < s.length; i++) {
-        h ^= s.charCodeAt(i);
-        h = Math.imul(h, 16777619);
-      }
-      return (h >>> 0) / 4294967296;
-    };
-
-    const solve = (nodeSizeLocal: number) => {
-      const nodeRadius = nodeSizeLocal / 2;
-
-      const effectiveDiameter = nodeSizeLocal * hoverFactor;
-      const gap = isMd ? 18 : 16;
-      const minSep = effectiveDiameter + 26; // circle-to-circle separation
-
-      const maxR = base - nodeRadius - safePadding - labelPad;
-      const minR = centerRadius + (isMd ? 96 : 84);
-
-      if (maxR <= minR + 8) {
-        return { ok: false as const, positioned: [], rings: [] as number[] };
-      }
-
-      const n = nonCenterProducts.length;
-      if (n === 0) {
-        return { ok: true as const, positioned: [], rings: [minR, (minR + maxR) / 2, maxR] };
-      }
-
-      // Golden angle distribution in annulus
-      const golden = Math.PI * (3 - Math.sqrt(5));
-      const points = nonCenterProducts.map((p, i) => {
-        const t = (i + 0.5) / n; // 0..1
-        const baseR = minR + (maxR - minR) * Math.sqrt(t);
-
-        const j = hash01(p.id);
-        const jitterA = (j - 0.5) * 0.45; // radians, small
-        const jitterR = (hash01(p.id + ':r') - 0.5) * (isMd ? 18 : 14);
-
-        const angle = i * golden - Math.PI / 2 + jitterA;
-        const r = Math.min(maxR, Math.max(minR, baseR + jitterR));
-
-        return {
-          product: p,
-          x: Math.cos(angle) * r,
-          y: Math.sin(angle) * r,
-        };
-      });
-
-      // Relaxation: push apart if too close
-      const iters = 14;
-      for (let k = 0; k < iters; k++) {
-        for (let a = 0; a < points.length; a++) {
-          for (let b = a + 1; b < points.length; b++) {
-            const dx = points[b].x - points[a].x;
-            const dy = points[b].y - points[a].y;
-            const d = Math.hypot(dx, dy) || 0.0001;
-
-            const target = minSep;
-            if (d < target) {
-              const push = (target - d) * 0.5;
-              const ux = dx / d;
-              const uy = dy / d;
-
-              points[a].x -= ux * push;
-              points[a].y -= uy * push;
-              points[b].x += ux * push;
-              points[b].y += uy * push;
-            }
-          }
-
-          // Clamp back into annulus
-          const rr = Math.hypot(points[a].x, points[a].y) || 0.0001;
-          const clamped = Math.min(maxR, Math.max(minR, rr));
-          points[a].x = (points[a].x / rr) * clamped;
-          points[a].y = (points[a].y / rr) * clamped;
-        }
-      }
-
-      // Final validation: if still overlapping badly, fail so caller can shrink node size
-      for (let a = 0; a < points.length; a++) {
-        for (let b = a + 1; b < points.length; b++) {
-          const d = Math.hypot(points[b].x - points[a].x, points[b].y - points[a].y);
-          if (d < minSep * 0.92) {
-            return { ok: false as const, positioned: [], rings: [minR, (minR + maxR) / 2, maxR] };
-          }
-        }
-      }
-
-      // Recenter to avoid visual drift (jitter + finite points can shift the "mass")
-      const cx = points.reduce((s, p) => s + p.x, 0) / n;
-      const cy = points.reduce((s, p) => s + p.y, 0) / n;
-
-      for (let i = 0; i < points.length; i++) {
-        let nx = points[i].x - cx;
-        let ny = points[i].y - cy;
-
-        // Clamp back into annulus after recenter
-        const r = Math.hypot(nx, ny);
-        const cr = clamp(r, minR, maxR);
-        const s = cr / (r || 1);
-        nx *= s;
-        ny *= s;
-
-        points[i].x = nx;
-        points[i].y = ny;
-      }
-
+    const centerRadius = (isMd ? 48 : 40) * Math.min(scale, 1);
+    
+    // Node size scales with container but has min/max bounds
+    const baseNodeSize = isMd ? 44 : 36;
+    const nodeSize = Math.max(32, Math.min(56, baseNodeSize * scale));
+    
+    // Calculate safe radii that keep nodes inside container
+    const padding = nodeSize + 30; // Space for node + label
+    const maxRadius = (size / 2) - padding;
+    const minRadius = centerRadius + nodeSize + 20;
+    
+    // If not enough space, reduce radii proportionally
+    const availableSpace = maxRadius - minRadius;
+    
+    const n = nonCenterProducts.length;
+    if (n === 0 || availableSpace < 40) {
       return {
-        ok: true as const,
-        positioned: points.map((p) => ({
-          product: p.product,
-          x: p.x,
-          y: p.y,
-          angle: Math.atan2(p.y, p.x),
-        })),
-        rings: [minR, (minR + maxR) / 2, maxR],
+        positioned: [],
+        rings: [minRadius, (minRadius + maxRadius) / 2, maxRadius],
+        nodeSize,
       };
-    };
-
-    let res = solve(nodeSize);
-    while (!res.ok && nodeSize > minNodeSize) {
-      nodeSize -= 4;
-      res = solve(nodeSize);
     }
-
+    
+    // Distribute products evenly in a single ring or multiple rings based on count
+    const ringCount = n <= 8 ? 1 : n <= 16 ? 2 : 3;
+    const ringSpacing = availableSpace / (ringCount + 1);
+    
+    const positioned = nonCenterProducts.map((product, i) => {
+      // Determine which ring this product goes on
+      const ringIndex = Math.floor((i / n) * ringCount);
+      const radius = minRadius + ringSpacing * (ringIndex + 1);
+      
+      // Calculate angle with offset per ring to avoid alignment
+      const productsInRing = Math.ceil(n / ringCount);
+      const indexInRing = i % productsInRing;
+      const angleStep = (2 * Math.PI) / productsInRing;
+      const ringOffset = ringIndex * (Math.PI / ringCount);
+      const angle = indexInRing * angleStep + ringOffset - Math.PI / 2;
+      
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      return {
+        product,
+        x,
+        y,
+        angle,
+      };
+    });
+    
     return {
-      positioned: res.positioned,
-      rings: res.rings,
+      positioned,
+      rings: Array.from({ length: ringCount }, (_, i) => minRadius + ringSpacing * (i + 1)),
       nodeSize,
     };
   }, [orbitSize, nonCenterProducts]);
@@ -255,8 +170,8 @@ export const ProductsOrbitSection = () => {
           <div className="relative w-full flex justify-center">
             <div
               ref={orbitRef}
-              className="relative mx-auto aspect-square w-full max-w-[760px]"
-              style={{ maxHeight: '72vh' }}
+              className="relative mx-auto aspect-square w-full max-w-[500px] md:max-w-[600px] lg:max-w-[700px]"
+              style={{ minHeight: '320px' }}
             >
             {/* Center Node */}
             <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
@@ -266,10 +181,10 @@ export const ProductsOrbitSection = () => {
                 viewport={{ once: true }}
                 className="pointer-events-auto"
               >
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg animate-pulse-glow">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg animate-pulse-glow">
                   <div className="text-center">
-                    <LucideIcons.Orbit className="h-6 w-6 md:h-7 md:w-7 text-primary-foreground mx-auto mb-1" />
-                    <span className="text-[9px] md:text-[10px] font-bold text-primary-foreground">Starship 360</span>
+                    <LucideIcons.Orbit className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground mx-auto mb-0.5" />
+                    <span className="text-[8px] md:text-[9px] font-bold text-primary-foreground">Starship 360</span>
                   </div>
                 </div>
               </motion.div>
@@ -289,22 +204,17 @@ export const ProductsOrbitSection = () => {
             ))}
 
             {/* Products by Ring */}
-            {layout.positioned.map((pos, idx) => {
+            {layout.positioned.map((pos) => {
               const { product, x, y, angle } = pos;
               const Icon = getIcon(product.icon);
 
-              const a = angle;
-              const labelR = layout.nodeSize / 2 + 22;
-              const radialX = Math.cos(a) * labelR;
-              const radialY = Math.sin(a) * labelR;
-
-              // Tangential stagger to avoid label pile-ups
-              const t = idx % 2 === 0 ? 14 : -14;
-              const tanX = -Math.sin(a) * t;
-              const tanY =  Math.cos(a) * t;
-
-              const labelDx = radialX + tanX;
-              const labelDy = radialY + tanY;
+              // Position label outside the node, pointing outward from center
+              const labelDistance = layout.nodeSize / 2 + 18;
+              const labelX = Math.cos(angle) * labelDistance;
+              const labelY = Math.sin(angle) * labelDistance;
+              
+              // Determine text alignment based on angle
+              const isRightSide = angle > -Math.PI / 2 && angle < Math.PI / 2;
 
               return (
                 <motion.button
@@ -313,7 +223,7 @@ export const ProductsOrbitSection = () => {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.05 }}
-                  whileHover={{ scale: 1.2, zIndex: 30 }}
+                  whileHover={{ scale: 1.15, zIndex: 30 }}
                   onClick={() => setSelectedProduct(product)}
                   className="absolute focus-ring rounded-full"
                   style={{ 
@@ -333,12 +243,14 @@ export const ProductsOrbitSection = () => {
                       border: `2px solid ${orbitColors[product.orbitRing]}`,
                     }}
                   >
-                    <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: orbitColors[product.orbitRing] }} />
+                    <Icon className="h-4 w-4 md:h-5 md:w-5" style={{ color: orbitColors[product.orbitRing] }} />
                   </div>
                   <span
-                    className="absolute left-1/2 top-1/2 text-xs text-muted-foreground whitespace-nowrap pointer-events-none truncate w-28 text-center"
+                    className="absolute text-[10px] md:text-xs text-muted-foreground whitespace-nowrap pointer-events-none"
                     style={{
-                      transform: `translate(-50%, -50%) translate(${labelDx}px, ${labelDy}px)`,
+                      left: `calc(50% + ${labelX}px)`,
+                      top: `calc(50% + ${labelY}px)`,
+                      transform: isRightSide ? 'translateY(-50%)' : 'translate(-100%, -50%)',
                     }}
                   >
                     {product.name.replace('Starship ', '').replace('Campus ', '')}
