@@ -24,7 +24,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section id="intro" className="min-h-screen pt-20 pb-20">
+    <section id="intro" className="pt-20 pb-0">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Main Title */}
@@ -100,7 +100,7 @@ export const HeroSection = () => {
           >
             <Card className="card-glass card-glow p-6 border-primary/20">
               <div className="flex items-start justify-between gap-4 mb-4">
-                <h3 className="font-display text-lg font-semibold">Plan Summary (My Approach)</h3>
+                <h3 className="font-display text-lg font-semibold starship-gradient-text">Plan Summary (My Approach)</h3>
                 <Button
                   variant="outline"
                   size="sm"
@@ -113,6 +113,18 @@ export const HeroSection = () => {
               <p className="text-foreground/90 leading-relaxed">
                 {introContent.summaryPitch}
               </p>
+              {introContent.businessUpsideBullets?.length ? (
+                <div className="mt-4 border-t border-white/10 pt-4">
+                  <div className="text-sm font-semibold text-white/90">
+                    {introContent.businessUpsideTitle}
+                  </div>
+                  <ul className="mt-2 space-y-2 text-sm text-white/70 list-disc pl-5">
+                    {introContent.businessUpsideBullets.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </Card>
           </motion.div>
 

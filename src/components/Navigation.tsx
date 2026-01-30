@@ -12,7 +12,7 @@ const navItems = [
   { id: 'roadmap', label: 'Roadmap' },
   { id: 'metrics', label: 'Metrics' },
   { id: 'experiments', label: 'Experiments' },
-  { id: 'data-needs', label: 'Data I Need' },
+  { id: 'data-needs', label: 'Data I Use' },
   { id: 'assumptions', label: 'Assumptions & Risks' },
   { id: 'full-plan', label: 'Full Plan' },
 ];
@@ -66,9 +66,11 @@ export const Navigation = () => {
   };
 
   const handleShare = async () => {
-    const shareText = `Pezhman action plan — Senior Product Manager — Starship 360 full-service suite
+    const shareText = `Starship 360 is framed as a campus marketplace with physical fulfillment at its core. Demand comes from students, supply comes from merchants and a finite robot fleet, and everything operates under real-world constraints such as kitchen capacity, sidewalk congestion, charging availability, and weather. This plan treats those physical constraints as first-class product inputs, with the goal of turning operational limits into predictable capacity that the marketplace can safely monetize.
 
-My first 3–6 months would focus on reliability across the full Starship 360 suite: customer app, kitchen tools, kiosks, pickup, delivery, and the partner control plane.`;
+The first phase focuses on building a shared truth of the system. By mapping the full end-to-end order lifecycle and exposing the most common failure modes, the plan reduces preventable cancellations and trust-breaking experiences that directly suppress revenue. Early, reversible improvements like clearer handoff expectations and kitchen capacity signaling are designed not only to improve reliability, but to unlock more completed orders during peak hours, where most revenue is made or lost.
+
+From months two to six, the focus shifts from stabilization to growth. With clearer visibility into capacity and constraints, demand can be deliberately steered across delivery, pickup, and kiosk channels to maximize successful transactions. The same operational insight is then used to identify new revenue streams, such as incremental demand capture at off-peak times, new fulfillment modes, premium delivery or convenience options, and campus-specific monetization opportunities. In this model, reliability is not just a quality goal, it is the foundation that enables sustainable revenue growth and the safe introduction of new revenue layers on top of the core marketplace.`;
     
     try {
       await navigator.clipboard.writeText(shareText);
@@ -204,3 +206,4 @@ My first 3–6 months would focus on reliability across the full Starship 360 su
     </>
   );
 };
+

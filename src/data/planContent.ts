@@ -1038,10 +1038,18 @@ export const introContent = {
   linkedIn: 'pezhman-sh',
   howToRead: 'Scroll through sections or use the navigation bar. Filter by persona or touchpoint to focus on areas relevant to you. Click cards to expand details. Use the print button to export a PDF.',
   summaryPitch: `My first 3–6 months would focus on reliability across the full Starship 360 suite: customer app, kitchen tools, kiosks, pickup, delivery, and the partner control plane. I'll start by mapping the full lifecycle and building a failure-mode dashboard, then reduce preventable cancellations and missed handoffs through capacity controls, demand steering, and better readiness and ETA modeling. I'll harden merchant ops tooling and support loops, especially across integrated channels, and scale with a campus playbook that includes accessibility and operational constraints.`,
+  businessUpsideTitle: 'Business upside (what this plan unlocks)',
+  businessUpsideBullets: [
+    'More completed orders at peak by steering demand to pickup/kiosk when delivery would fail',
+    'Lower refunds and support cost by reducing late cancels, missed handoffs, and ownership ping-pong',
+    'Higher merchant retention and coverage by preventing overload cascades with capacity controls',
+    'Better fleet ROI by improving utilization without breaking reliability targets',
+  ],
 };
 
 export const overviewContent = {
   mentalModel: `I think of Starship 360 as a campus marketplace with physical fulfillment. At its core, it's matching demand (students wanting food) with supply (merchants who can make it and robots/pickup that can deliver it). But unlike a pure digital marketplace, the constraints are physical: robots have limited capacity, merchants have kitchen limits, sidewalks have congestion, and weather affects everything. My mental model centers on understanding and managing these physical constraints while making the digital experience feel seamless.`,
+  mentalModelEmphasis: `Beyond managing constraints, this model also helps identify new revenue streams by revealing where additional demand, new fulfillment modes, or premium experiences can be introduced without compromising reliability.`,
   definitions: [
     { term: 'Supply', definition: 'Available capacity to fulfill orders—robot availability, merchant kitchen capacity, kiosk throughput, and pickup station capacity combined.' },
     { term: 'Demand', definition: 'Orders and order intent from students, whether through the app, kiosks, integrated channels, or in-person.' },
@@ -1342,4 +1350,6 @@ export const orbitRings = [
   { id: 'enablers', name: 'Enablers', color: 'orbit-enablers' },
   { id: 'adjacent', name: 'Adjacent', color: 'orbit-adjacent' },
 ];
+
+
 

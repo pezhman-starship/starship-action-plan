@@ -98,9 +98,14 @@ export const OverviewSection = () => {
             className="mb-8"
           >
             <div className="card-glass rounded-xl p-6">
-              <h3 className="font-display text-xl font-semibold mb-4">My mental model</h3>
+              <h3 className="font-display text-xl font-semibold mb-4 starship-gradient-text">My mental model</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {overviewContent.mentalModel}
+                {overviewContent.mentalModel}{' '}
+                {overviewContent.mentalModelEmphasis ? (
+                  <em className="italic text-muted-foreground">
+                    {overviewContent.mentalModelEmphasis}
+                  </em>
+                ) : null}
               </p>
             </div>
           </motion.div>

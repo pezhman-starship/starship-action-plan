@@ -11,6 +11,7 @@ import { ExperimentsSection } from '@/components/ExperimentsSection';
 import { DataNeedsSection } from '@/components/DataNeedsSection';
 import { AssumptionsSection } from '@/components/AssumptionsSection';
 import { FullPlanSection } from '@/components/FullPlanSection';
+import robotsImg from '@/pic/robots.png';
 
 const Index = () => {
   const productsRangeRef = useRef<HTMLDivElement | null>(null);
@@ -60,6 +61,14 @@ const Index = () => {
         
         <main className="pt-16">
           <HeroSection />
+          <div className="mx-auto w-full max-w-2xl px-4 mb-[4px]">
+            <img
+              src={robotsImg}
+              alt="Starship robots"
+              className="w-full h-auto object-contain"
+              loading="lazy"
+            />
+          </div>
           <div className="glow-line w-full max-w-2xl mx-auto" />
           <OverviewSection />
           <div className="glow-line w-full max-w-2xl mx-auto" />

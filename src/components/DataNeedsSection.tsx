@@ -13,7 +13,7 @@ export const DataNeedsSection = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="section-header text-center">
-            <span className="text-gradient">Data I Need</span>
+            <span className="text-gradient">Data I Use</span>
           </h2>
           <p className="section-subheader text-center max-w-2xl mx-auto">
             What data would accelerate my work — and what I can do without it

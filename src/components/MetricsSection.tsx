@@ -108,91 +108,103 @@ export const MetricsSection = () => {
               className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-card border border-border rounded-2xl z-50 max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 py-6 overflow-y-auto"
               role="dialog"
               aria-labelledby="metric-title"
               aria-modal="true"
             >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <span 
-                      className="text-xs font-medium px-2 py-1 rounded-full"
-                      style={{ 
-                        background: `${categoryColors[selectedMetric.category]}20`,
-                        color: categoryColors[selectedMetric.category],
-                      }}
-                    >
-                      {selectedMetric.category}
-                    </span>
-                    <h3 id="metric-title" className="font-display text-xl font-bold mt-2">
-                      {selectedMetric.name}
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setSelectedMetric(null)}
-                    className="p-2 hover:bg-muted rounded-lg focus-ring"
-                    aria-label="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Definition */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-1">Definition</h4>
-                    <p className="text-foreground/90">{selectedMetric.definition}</p>
-                  </div>
-
-                  {/* Why It Matters */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-1">Why it matters</h4>
-                    <p className="text-foreground/90">{selectedMetric.whyItMatters}</p>
-                  </div>
-
-                  {/* Pains Addressed */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">Pains addressed</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedMetric.painsAddressed.map(pain => (
-                        <span key={pain} className="px-2 py-1 rounded bg-destructive/10 text-destructive text-xs">
-                          {pain.replace(/-/g, ' ')}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-[720px] max-h-[calc(100vh-3rem)] bg-card border border-border rounded-2xl overflow-hidden min-w-0"
+              >
+                <div className="flex flex-col max-h-[calc(100vh-3rem)]">
+                  <div className="p-6 pb-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span 
+                          className="text-xs font-medium px-2 py-1 rounded-full"
+                          style={{ 
+                            background: `${categoryColors[selectedMetric.category]}20`,
+                            color: categoryColors[selectedMetric.category],
+                          }}
+                        >
+                          {selectedMetric.category}
                         </span>
-                      ))}
+                        <h3 id="metric-title" className="font-display text-xl font-bold mt-2">
+                          {selectedMetric.name}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => setSelectedMetric(null)}
+                        className="p-2 hover:bg-muted rounded-lg focus-ring"
+                        aria-label="Close"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
                     </div>
                   </div>
 
-                  {/* Touchpoints */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">Touchpoints influencing</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedMetric.touchpointsInfluencing.map(t => {
-                        const touchpoint = touchpoints.find(tp => tp.id === t);
-                        return touchpoint ? (
-                          <span key={t} className="touchpoint-tag">{touchpoint.name}</span>
-                        ) : null;
-                      })}
-                    </div>
-                  </div>
+                  <div className="px-6 pb-6 overflow-y-auto">
+                    <div className="space-y-4">
+                      {/* Definition */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-1">Definition</h4>
+                        <p className="text-foreground/90">{selectedMetric.definition}</p>
+                      </div>
 
-                  {/* Personas */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">Personas</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedMetric.personas.map(p => {
-                        const persona = personas.find(pe => pe.id === p);
-                        return persona ? (
-                          <span key={p} className={`persona-tag ${persona.color}`}>{persona.name}</span>
-                        ) : null;
-                      })}
+                      {/* Why It Matters */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-1">Why it matters</h4>
+                        <p className="text-foreground/90">{selectedMetric.whyItMatters}</p>
+                      </div>
+
+                      {/* Pains Addressed */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-2">Pains addressed</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedMetric.painsAddressed.map(pain => (
+                            <span key={pain} className="px-2 py-1 rounded bg-destructive/10 text-destructive text-xs">
+                              {pain.replace(/-/g, ' ')}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Touchpoints */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-2">Touchpoints influencing</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedMetric.touchpointsInfluencing.map(t => {
+                            const touchpoint = touchpoints.find(tp => tp.id === t);
+                            return touchpoint ? (
+                              <span key={t} className="touchpoint-tag">{touchpoint.name}</span>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Personas */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-2">Personas</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedMetric.personas.map(p => {
+                            const persona = personas.find(pe => pe.id === p);
+                            return persona ? (
+                              <span key={p} className={`persona-tag ${persona.color}`}>{persona.name}</span>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           </>
         )}
